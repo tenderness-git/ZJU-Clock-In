@@ -1,0 +1,32 @@
+name: ClockIn
+
+on:
+  push:
+    branches: 
+      - master
+  watch:
+    types: started
+  schedule:
+    - cron: 0 */3 * * *
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Install python3
+        run: |
+          sudo -E apt-get -yqq update
+          sudo -E apt-get -yqq install python3
+      - name: Install extensions
+        run: |
+          pip3 install setuptools
+          pip3 install halo requests
+      - name: Run program
+        env:
+          ACCOUNT: ${{ secrets.ACCOUNT }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+        run: |
+          python3 clock-in.py ${ACCOUNT} ${PASSWORD}
