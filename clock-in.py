@@ -5,7 +5,6 @@ import re
 import datetime
 import time
 import sys
-from halo import Halo
 
 
 class DaKa(object):
@@ -140,38 +139,34 @@ def main(username, password):
     print("\n[Time] %s" %
           datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     print("🚌 打卡任务启动")
-    spinner = Halo(text='Loading', spinner='dots')
-    spinner.start('正在新建打卡实例...')
-    dk = DaKa(username, password)
-    spinner.succeed('已新建打卡实例')
 
-    spinner.start(text='登录到浙大统一身份认证平台...')
+    dk = DaKa(username, password)
+
+    print("登录到浙大统一身份认证平台...")
     try:
         dk.login()
-        spinner.succeed('已登录到浙大统一身份认证平台')
+        print("已登录到浙大统一身份认证平台")
     except Exception as err:
-        spinner.fail(str(err))
+        print(str(err))
         return
 
-    spinner.start(text='正在获取个人信息...')
+    print('正在获取个人信息...')
     try:
         dk.get_info()
-        spinner.succeed('%s %s同学, 你好~' % (dk.info['number'], dk.info['name']))
+        print('%s %s同学, 你好~' % (dk.info['number'], dk.info['name']))
     except Exception as err:
-        spinner.fail('获取信息失败，请手动打卡，更多信息: ' + str(err))
+        print('获取信息失败，请手动打卡，更多信息: ' + str(err))
         return
 
-    spinner.start(text='正在为您打卡打卡打卡')
+    print(text='正在为您打卡打卡打卡')
     try:
         res = dk.post()
         if str(res['e']) == '0':
-            spinner.stop_and_persist(
-                symbol='🦄 '.encode('utf-8'), text='已为您打卡成功！')
+            print('已为您打卡成功！')
         else:
-            spinner.stop_and_persist(
-                symbol='🦄 '.encode('utf-8'), text=res['m'])
+            print(res['m'])
     except Exception:
-        spinner.fail('数据提交失败')
+        print('数据提交失败')
         return
 
 
