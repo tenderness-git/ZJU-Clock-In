@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+# 打卡脚修改自ZJU-nCov-Hitcarder的开源代码，感谢这位同学开源的代码
+
 import requests
 import json
 import re
@@ -148,7 +151,7 @@ def main(username, password):
         print("已登录到浙大统一身份认证平台")
     except Exception as err:
         print(str(err))
-        return
+        raise Exception
 
     print('正在获取个人信息...')
     try:
@@ -156,7 +159,7 @@ def main(username, password):
         print('%s %s同学, 你好~' % (dk.info['number'], dk.info['name']))
     except Exception as err:
         print('获取信息失败，请手动打卡，更多信息: ' + str(err))
-        return
+        raise Exception
 
     print(text='正在为您打卡打卡打卡')
     try:
@@ -167,7 +170,7 @@ def main(username, password):
             print(res['m'])
     except Exception:
         print('数据提交失败')
-        return
+        raise Exception
 
 
 if __name__ == "__main__":
