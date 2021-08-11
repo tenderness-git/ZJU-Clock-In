@@ -9,7 +9,6 @@ import datetime
 import time
 import sys
 
-
 class ClockIn(object):
     """Hit card class
 
