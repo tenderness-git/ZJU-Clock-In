@@ -29,6 +29,7 @@ class DaKa(object):
         self.base_url = "https://healthreport.zju.edu.cn/ncov/wap/default/index"
         self.save_url = "https://healthreport.zju.edu.cn/ncov/wap/default/save"
         self.sess = requests.Session()
+        self.sess.keep_alive = False
 
     def login(self):
         """Login to ZJU platform"""
