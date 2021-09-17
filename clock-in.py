@@ -22,17 +22,22 @@ class DaKa(object):
         sess: (requests.Session) 统一的session
     """
 
+    headers = {
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36',
+    }
+
+    LOGIN_URL = "https://zjuam.zju.edu.cn/cas/login?service=https%3A%2F%2Fhealthreport.zju.edu.cn%2Fa_zju%2Fapi%2Fsso%2Findex%3Fredirect%3Dhttps%253A%252F%252Fhealthreport.zju.edu.cn%252Fncov%252Fwap%252Fdefault%252Findex"
+    BASE_URL = "https://healthreport.zju.edu.cn/ncov/wap/default/index"
+    SAVE_URL = "https://healthreport.zju.edu.cn/ncov/wap/default/save"
+
     def __init__(self, username, password):
         self.username = username
         self.password = password
-        self.login_url = "https://zjuam.zju.edu.cn/cas/login?service=https%3A%2F%2Fhealthreport.zju.edu.cn%2Fa_zju%2Fapi%2Fsso%2Findex%3Fredirect%3Dhttps%253A%252F%252Fhealthreport.zju.edu.cn%252Fncov%252Fwap%252Fdefault%252Findex"
-        self.base_url = "https://healthreport.zju.edu.cn/ncov/wap/default/index"
-        self.save_url = "https://healthreport.zju.edu.cn/ncov/wap/default/save"
         self.sess = requests.Session()
 
     def login(self):
         """Login to ZJU platform"""
-        res = self.sess.get(self.login_url)
+        res = self.sess.get(self.LOGIN_URL)
         execution = re.search(
             'name="execution" value="(.*?)"', res.text).group(1)
         res = self.sess.get(
@@ -46,7 +51,7 @@ class DaKa(object):
             'execution': execution,
             '_eventId': 'submit'
         }
-        res = self.sess.post(url=self.login_url, data=data)
+        res = self.sess.post(url=self.LOGIN_URL, data=data)
 
         # check if login successfully
         if '统一身份认证' in res.content.decode():
@@ -55,20 +60,14 @@ class DaKa(object):
 
     def post(self):
         """Post the hitcard info"""
-        res = self.sess.post(self.save_url, data=self.info)
+        res = self.sess.post(self.SAVE_URL, data=self.info, headers=self.headers)
         return json.loads(res.text)
-
-    def get_date(self):
-        """Get current date"""
-        today = datetime.date.today()
-        return "%4d%02d%02d" % (today.year, today.month, today.day)
 
     def get_info(self, html=None):
         """Get hitcard info, which is the old info with updated new time."""
         if not html:
-            res = self.sess.get(self.base_url)
+            res = self.sess.get(self.BASE_URL, headers=self.headers)
             html = res.content.decode()
-
         try:
             old_infos = re.findall(r'oldInfo: ({[^\n]+})', html)
             if len(old_infos) != 0:
@@ -115,6 +114,11 @@ class DaKa(object):
         result_int = pow(password_int, e_int, M_int)
         return hex(result_int)[2:].rjust(128, '0')
 
+    @staticmethod
+    def get_date():
+        """Get current date"""
+        today = datetime.date.today()
+        return "%4d%02d%02d" % (today.year, today.month, today.day)
 
 # Exceptions
 class LoginError(Exception):
@@ -161,7 +165,7 @@ def main(username, password):
         print('获取信息失败，请手动打卡，更多信息: ' + str(err))
         raise Exception
 
-    print(text='正在为您打卡打卡打卡')
+    print('正在为您打卡打卡打卡')
     try:
         res = dk.post()
         if str(res['e']) == '0':
